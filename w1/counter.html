@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Counter Display</title>
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        background: #f8f9fa;
+      }
+      #display {
+        font-size: 5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #222;
+        text-align: center;
+      }
+      .button-group {
+        display: flex;
+        gap: 2rem;
+      }
+      button {
+        font-size: 2.5rem;
+        width: 80px;
+        height: 80px;
+        border: none;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:active {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="display"></div>
+    <div class="button-group">
+      <button id="minus">-</button>
+      <button id="plus">+</button>
+    </div>
+
+    <script>
+      const target = { num: 10 };
+      const displayObj = document.querySelector("#display");
+      const plusBtn = document.querySelector("#plus");
+      const minusBtn = document.querySelector("#minus");
+
+      function updateDisplay() {
+        displayObj.innerHTML = `num ${target.num}`;
+      }
+
+      plusBtn.addEventListener("click", () => {
+        target.num++;
+        updateDisplay();
+      });
+
+      minusBtn.addEventListener("click", () => {
+        target.num--;
+        updateDisplay();
+      });
+
+      updateDisplay();
+    </script>
+  </body>
+</html>
