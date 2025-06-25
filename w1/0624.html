@@ -66,6 +66,15 @@
         <h2>장바구니</h2>
         <p>선택한 항목이 여기에 표시됩니다.</p>
         <ul class="cartItemList"></ul>
+          <div
+            class="cartTotal"
+            style="margin-top: 20px; font-weight: bold; font-size: 1.2em"
+          >
+            총액: <span id="cartTotalAmount"></span>원
+          </div>
+
+          <button class="checkoutBtn" style="margin-top: 20px; padding: 10px 20px; font-size: 4em; cursor: pointer;">결제하기</button>
+        </div>
       </div>
     </div>
 
@@ -73,15 +82,17 @@
       import { addCart, changeCartQty } from "/src/cart.js";
 
       const menus = [
-        { mno: 1, name: "짜장면", price: 8000 },
-        { mno: 2, name: "짬뽕", price: 9000 },
-        { mno: 3, name: "볶음밥", price: 9800 },
-        { mno: 4, name: "울면", price: 8500 },
-        { mno: 5, name: "덴푸라", price: 18000 },
+        { mno: 1, name: "짜장면", price: 8000, img: "jjajang.jpg" },
+        { mno: 2, name: "짬뽕", price: 9000, img: "jjamppong.jpg" },
+        { mno: 3, name: "볶음밥", price: 9800, img: "bokkeumbap.jpg" },
+        { mno: 4, name: "울면", price: 8500, img: "ulmyun.jpg" },
+        { mno: 5, name: "덴푸라", price: 18000, img: "tempura.jpg" },
       ];
 
       const menuList = document.querySelector(".menuList");
       const cartItemList = document.querySelector(".cartItemList");
+      
+      const checkout = document.querySelector(".checkoutBtn");
 
       cartItemList.addEventListener(
         "click",
@@ -100,44 +111,153 @@
       const fragment = document.createDocumentFragment();
 
       menus.forEach((menu) => {
-        const li = document.createElement("li");
-        li.textContent = `${menu.name} - ${menu.price.toLocaleString()}원`;
+        const img = document.createElement("img");
+        img.src = `/public/${menu.img}`; // 이미지 경로에 맞게 수정하세요
+        img.alt = menu.name;
+        img.style.width = "90px"; // 원하는 크기로 조정
+        img.style.height = "90px";
+        img.style.objectFit = "cover";
+        img.style.marginRight = "15px";
+        img.style.verticalAlign = "middle";
+
+        //각 메뉴 항목에 대하여 아래 작업을 반복 순회
+        const li = document.createElement("li"); //li요소 생성
+        const text = document.createTextNode(
+          `${menu.name} - ${menu.price.toLocaleString()}원`
+        ); //li요소에 텍스트 추가
+
+        li.appendChild(img);
+        li.appendChild(text);
+
         li.addEventListener(
+          //li를 클릭하면 실행되는 함수 생성
           "click",
           (e) => {
-            e.stopPropagation();
-            e.preventDefault();
+            e.stopPropagation(); // 클릭 이벤트가 상위 요소로 전파되는 것을 막음.
+            e.preventDefault(); // 요소의 기본 동작을 막음.
             alert(menu.name);
-            const currentCart = addCart(menu);
+            const currentCart = addCart(menu); // 클릭한 메뉴를 장바구니에 추가함.
             displayCartItems(currentCart);
           },
           false
         );
-        fragment.appendChild(li);
+        fragment.appendChild(li); // 만든 li를 fregment에 추가함.
       });
 
-      menuList.appendChild(fragment);
+      menuList.appendChild(fragment); //모둔 메뉴 항목이 담긴 fregment를 .menuList 요소에 추가함 -> DOM이 여러 번 갱신되는 것을 막을 수 있음.
 
       function displayCartItems(cartItems) {
         console.log("=====================", cartItems);
         let str = "";
-        for (let { mno, name, price, qty } of cartItems) {
+        let cartTotal = 0;
+        for (let { mno, name, price, qty, img } of cartItems) {
           console.log(mno, name, price, qty);
           str += `<li>
+            <div style="display:flex; align-items:center;">
+                <img src="/public/${img}" style="width:40px; height:40px; object-fit:cover; border-radius:6px; margin-right:10px;">
+                <div>
                     <div>
                         <div>
-                        ${mno} -- ${name} - ${price} - ${qty} = ${qty * price}
+                        ${img} ${name}: ${price} - ${qty}개 = ${qty * price}
                         </div>
                         <div>
-                            <button data-mno=${mno} data-oper='plus' >+</button>
+                            <button data-mno=${mno} data-oper='plus' >+</button> 
                             <button data-mno=${mno} data-oper='minus'>-</button>
                         </div>
                     </div>
+                    </div>
                 </li>`;
+                cartTotal += price*qty;
         } //end for
 
         cartItemList.innerHTML = str;
+        document.getElementById("cartTotalAmount").textContent = cartTotal.toLocaleString();
+
       }
-    </script>
+      
+
+      checkout.addEventListener("click", (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+
+  // 현재 장바구니 항목 가져오기
+  // cart.js의 addCart/changeCartQty가 반환하는 cart 배열을 활용해야 하지만,
+  // 여기서는 화면에 보이는 cartItemList의 li를 파싱해서 처리합니다.
+
+  const cartLis = document.querySelectorAll(".cartItemList li");
+  const cartTotalAmount = document.getElementById("cartTotalAmount").textContent;
+
+  if (!cartLis.length || cartTotalAmount === "0") {
+    alert("장바구니에 상품이 없습니다.");
+    return;
+  }
+
+  // 영수증 HTML 만들기
+  let receiptHtml = `
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <title>결제 영수증</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; background: #f8f8f8; }
+        h2 { color: #d35400; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: center; }
+        th { background: #ffe0cc; }
+        .total { font-weight: bold; font-size: 1.2em; color: #2c3e50; }
+      </style>
+    </head>
+    <body>
+      <h2>결제 영수증</h2>
+      <table>
+        <tr>
+          <th>상품명</th>
+          <th>수량</th>
+          <th>단가</th>
+          <th>금액</th>
+        </tr>
+  `;
+
+  cartLis.forEach(li => {
+    // li.innerText 예시: "짜장면: 8,000 - 2개 = 16,000"
+    // 정규표현식으로 값 추출
+    const text = li.innerText.replace(/\n/g, " ");
+    const match = text.match(/([가-힣a-zA-Z0-9]+):\s*([\d,]+)\s*-\s*(\d+)개\s*=\s*([\d,]+)/);
+    if (match) {
+      const name = match[1].trim();
+      const price = match[2].trim();
+      const qty = match[3].trim();
+      const amount = match[4].trim();
+      receiptHtml += `
+        <tr>
+          <td>${name}</td>
+          <td>${qty}</td>
+          <td>${Number(price).toLocaleString()}원</td>
+          <td>${Number(amount).toLocaleString()}원</td>
+        </tr>
+      `;
+    }
+  });
+
+  receiptHtml += `
+      </table>
+      <div class="total" style="margin-top:20px;">총 결제 금액: ${cartTotalAmount}원</div>
+      <div style="margin-top:30px; font-size:0.9em; color:#888;">감사합니다!</div>
+    </body>
+    </html>
+  `;
+
+  // 새 창 열고 영수증 출력
+  const receiptWindow = window.open("", "receipt", "width=500,height=600");
+  receiptWindow.document.write(receiptHtml);
+  receiptWindow.document.close();
+});
+
+
+
+    
+    </script> 
+    
   </body>
 </html>

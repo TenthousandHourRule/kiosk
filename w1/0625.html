@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      async function getTodos() {
+        const result = await fetch(
+          "https://jsonplaceholder.typicode.com/todos"
+        );
+        const todos = await result.json();
+        // console.log(todos);
+        return todos;
+      }
+
+      const todoData = getTodos();
+      console.log("===========");
+      todoData.then((arr) => {
+        console.log("--------------");
+        console.log("arr", arr);
+      });
+
+      // const result = fetch('https://jsonplaceholder.typicode.com/todos')
+
+      // result.then(() => {
+      //     console.log("then")
+      // })
+
+      // console.log("AAAA")
+    </script>
+  </body>
+</html>
