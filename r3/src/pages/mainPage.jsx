@@ -1,14 +1,14 @@
-import BasicLayout from "../layOuts/basicLayout";
+import BasicLayout from "../layouts/basicLayout";
+
 
 function MainPage() {
-  return (
-    <BasicLayout>
-      <div>
-        <h1>mainPage</h1>
-      </div>
-      ;
-    </BasicLayout>
-  );
+    return ( 
+        <BasicLayout>
+            <div>
+                <h1>Main Page</h1>
+            </div>
+        </BasicLayout>
+     );
 }
 
 export default MainPage;
